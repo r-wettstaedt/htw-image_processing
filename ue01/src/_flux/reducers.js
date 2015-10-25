@@ -4,12 +4,12 @@ import * as actions from './actions'
 
 const initialState = {
     images : [
-        '/images/ABC.png',
-        '/images/Bibel3.jpg',
-        '/images/Book1.jpg',
-        '/images/component.jpg',
-        '/images/lowContrast.jpg',
-        '/images/tools1.png',
+        `${location.pathname}images/ABC.png`,
+        `${location.pathname}images/Bibel3.jpg`,
+        `${location.pathname}images/Book1.jpg`,
+        `${location.pathname}images/component.jpg`,
+        `${location.pathname}images/lowContrast.jpg`,
+        `${location.pathname}images/tools1.png`,
         // '/images/yeogurt-swirl.png',
     ],
     activeImage : 0,
