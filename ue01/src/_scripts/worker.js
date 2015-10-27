@@ -43,8 +43,6 @@ onmessage = e => {
         console.log(`Outlining took ${endTime-startTime}ms to complete`)
     }
 
-    // console.log('\n---\n')
-
     postMessage({ pixels : pixels, threshold : config.threshold })
 
 }

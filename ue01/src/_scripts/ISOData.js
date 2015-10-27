@@ -12,65 +12,38 @@ export default function(pixels) {
     for (let i = 0; i < pixels.length; i++) {
         let pixel = grayscale({
             r : pixels[i] || 0,
-            g : pixels[i + 1] || 0,
-            b : pixels[i + 2] || 0,
-            a : pixels[i + 3] || 0,
+            g : pixels[++i] || 0,
+            b : pixels[++i] || 0,
+            a : pixels[++i] || 0,
         })
         histogram[pixel]++
     }
 
-    let thresholds = []
-
     while (Math.abs(newTreshold - threshold) > 1) {
         threshold = newTreshold
 
-        let sum = {pre : 0, post : 0}
+        let sum = {pre : 0, pre2 : 0, post : 0, post2 : 0}
         for (let i = 0; i < threshold; i++) {
             sum.pre += histogram[i]
+            sum.pre2 += i * histogram[i]
         }
         for (let i = threshold; i < histogram.length; i++) {
             sum.post += histogram[i]
+            sum.post2 += i * histogram[i]
         }
         let mean = {
-            pre: sum.pre / (threshold - 1),
-            post: sum.post / (histogram.length - threshold)
+            pre: (sum.pre2 / sum.pre) || threshold,
+            post: (sum.post2 / sum.post) || threshold,
         }
-        // console.log(`Mean: ${parseInt(mean.pre)}`)
-        // console.log(`Mean: ${parseInt(mean.post)}`)
-        let diff = {
-            pre : {value : Number.MAX_SAFE_INTEGER},
-            post : {value : Number.MAX_SAFE_INTEGER}
-        }
+        // console.log(`Mean pre : ${parseInt(mean.pre)}`)
+        // console.log(`Mean post: ${parseInt(mean.post)}`)
+        newTreshold = Math.round((mean.pre + mean.post) / 2)
 
-        for (let i = 0; i < threshold; i++) {
-            let delta = Math.abs(histogram[i] - mean.pre)
-            if (delta < diff.pre.value) {
-                diff.pre = {
-                    index : i,
-                    value : delta
-                }
-            }
-        }
-        for (let i = threshold; i < histogram.length; i++) {
-            let delta = Math.abs(histogram[i] - mean.post)
-            if (delta < diff.post.value) {
-                diff.post = {
-                    index : i,
-                    value : delta
-                }
-            }
-        }
-        // console.log(`Diff: ${diff.pre.index} ${parseInt(diff.pre.value)}`)
-        // console.log(`Diff: ${diff.post.index} ${parseInt(diff.post.value)}`)
-        newTreshold = Math.round(diff.pre.index + (diff.post.index - diff.pre.index) / 2)
-
-        // console.log(`Iteration: ${iterationCounter} - ${newTreshold}\n\n`)
-
-        thresholds.push(newTreshold)
+        // console.log(`Iteration ${iterationCounter}: ${newTreshold}\n\n`)
 
         iterationCounter++
-        if (iterationCounter >= 1000) {
-            console.log('Aborted after 1000 iterations')
+        if (iterationCounter >= 100) {
+            console.log('Aborted after 100 iterations')
             break
         }
     }

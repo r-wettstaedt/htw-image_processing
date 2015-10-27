@@ -10,7 +10,7 @@ const initialState = {
         `${location.pathname}images/component.jpg`,
         `${location.pathname}images/lowContrast.jpg`,
         `${location.pathname}images/tools1.png`,
-        // '/images/yeogurt-swirl.png',
+        `${location.pathname}images/yeogurt-swirl.png`,
     ],
     activeImage : 0,
     useISOData : false,

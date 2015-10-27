@@ -2,6 +2,7 @@ import React from 'react'
 
 import {store} from '../../_flux/store'
 import {changeThreshold} from '../../_flux/actions'
+import {binarize} from '../../_scripts/colorConvert'
 
 let Worker = require('worker!../../_scripts/worker')
 
@@ -64,10 +65,10 @@ export default React.createClass({
 
         this.refs.dest.width = image.width
         this.refs.dest.height = image.height
-        let self = this
+        let context = this
         this.worker.onmessage = e => {
             let imageData = new ImageData( e.data.pixels, image.width, image.height )
-            self.state.context.dest.putImageData( imageData, 0, 0 )
+            context.state.context.dest.putImageData( imageData, 0, 0 )
 
             if (state.useISOData)
                 store.dispatch(changeThreshold(e.data.threshold))
