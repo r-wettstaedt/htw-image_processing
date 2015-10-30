@@ -1,52 +1,40 @@
-import React from 'react'
+import React, {Component, PropTypes} from 'react'
+import {bindActionCreators} from 'redux'
+import {connect} from 'react-redux';
+import {changeActiveImage, addImage} from '../../_flux/actions'
 
-import {store} from '../../_flux/store'
-import {addImage, changeActiveImage} from '../../_flux/actions'
 
-export default React.createClass({
+@connect(
+    state => ({
+        activeImage : state.controls.activeImage,
+        images : state.controls.images,
+    }),
+    dispatch => bindActionCreators({changeActiveImage, addImage}, dispatch))
 
-    getInitialState : function() {
-        let state = store.getState().controls
-        return {
-            images : state.images,
-            selectedImage : state.activeImage
-        }
-    },
+export default class PictureSelect extends Component {
 
-    componentDidMount : function() {
-        store.subscribe(() => {
-            let state = store.getState().controls
-            this.setState({
-                images : state.images,
-                selectedImage : state.activeImage
-            })
-        })
-    },
-
-    clickHandler : function(event) {
+    clickHandler (event) {
         let id = event.currentTarget.dataset.reactid
         id = parseInt(id.slice(id.length - 1))
-        this.setState({selectedImage: id})
+        this.props.changeActiveImage(id)
+    }
 
-        store.dispatch(changeActiveImage(id))
-    },
-
-    imageChoosen : function (event) {
+    imageChoosen (event) {
         const reader = new FileReader()
-        reader.onload = function(data) {
-            store.dispatch(addImage( data.target.result ))
+        reader.onload = data => {
+            this.props.addImage(data.target.result)
         }
         reader.readAsDataURL(event.target.files[0])
-    },
+    }
 
-    render : function() {
+    render () {
         return (
             <div className='picture-select'>
 
                 {
-                    this.state.images.map( (image, index) => {
+                    this.props.images.map( (image, index) => {
                         return (
-                            <figure className={this.state.selectedImage == index ? 'picture-select__image-wrapper active' : 'picture-select__image-wrapper'} onClick={this.clickHandler} key={index}>
+                            <figure className={this.props.activeImage == index ? 'picture-select__image-wrapper active' : 'picture-select__image-wrapper'} onClick={this.clickHandler.bind(this)} key={index}>
                                 <img className='picture-select__image' src={image} />
                             </figure>
                         )
@@ -57,11 +45,17 @@ export default React.createClass({
                     <label htmlFor='input-file'>
                         <i className='glyphicon glyphicon-floppy-open'/>
                     </label>
-                    <input id='input-file' className='hide' type='file' accept='.jpg' onChange={this.imageChoosen} />
+                    <input id='input-file' className='hide' type='file' accept='.jpg' onChange={this.imageChoosen.bind(this)} />
                 </div>
 
             </div>
         )
     }
 
-})
+}
+
+PictureSelect.propTypes = {
+    changeActiveImage : PropTypes.func,
+    addImage : PropTypes.func,
+}
+

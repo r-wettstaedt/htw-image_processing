@@ -1,35 +1,41 @@
-import React from 'react'
-
-import {store} from '../../_flux/store'
+import React, {Component, PropTypes} from 'react'
+import {bindActionCreators} from 'redux'
+import {connect} from 'react-redux';
 import {changeThreshold} from '../../_flux/actions'
-import {binarize} from '../../_scripts/colorConvert'
+import {store} from '../../_flux/store'
 
 let Worker = require('worker!../../_scripts/worker')
 
-export default React.createClass({
+@connect(
+    state => ({
+        activeImage : state.controls.activeImage,
+        images : state.controls.images,
+        threshold : state.controls.threshold,
+        thresholdByISOData : state.controls.thresholdByISOData,
+        useISOData : state.controls.useISOData,
+        useOutline : state.controls.useOutline,
+    }),
+    dispatch => bindActionCreators({changeThreshold}, dispatch))
 
-    getInitialState : function() {
-        this.drawSrc().then(this.drawDest)
-        return {
-            context : null
-        }
-    },
+export default class Canvas extends Component {
 
-    componentDidMount : function() {
-        store.subscribe( () => {
-            this.drawSrc().then(this.drawDest)
-        })
+    componentDidMount () {
         this.setState({
             context : {
                 src : this.refs.src.getContext('2d'),
                 dest : this.refs.dest.getContext('2d')
             }
         })
-    },
+        this.drawSrc().then(this.drawDest.bind(this))
+        store.subscribe( () => {
+            setTimeout( () => {
+                this.drawSrc().then(this.drawDest.bind(this))
+            })
+        })
+    }
 
-    drawSrc : function() {
-        let state = store.getState().controls
-        let imageData = state.images[state.activeImage]
+    drawSrc () {
+        let imageData = this.props.images[this.props.activeImage]
 
         let image = new Image()
         image.src = imageData
@@ -42,13 +48,13 @@ export default React.createClass({
                 resolve(image)
             }
         })
-    },
+    }
 
-    drawDest : function( image ) {
-        let state = store.getState().controls
+    drawDest (image) {
         if (this.worker)
             this.worker.terminate()
-        if (state.thresholdByISOData)
+
+        if (this.props.thresholdByISOData)
             return
 
         let pixels = this.state.context.src.getImageData( 0, 0, image.width, image.height ).data
@@ -56,7 +62,11 @@ export default React.createClass({
         this.worker = new Worker()
         this.worker.postMessage({
             pixels : pixels,
-            config : state,
+            config : {
+                threshold : this.props.threshold,
+                useISOData : this.props.useISOData,
+                useOutline : this.props.useOutline,
+            },
             image: {
                 height : image.height,
                 width : image.width,
@@ -70,12 +80,12 @@ export default React.createClass({
             let imageData = new ImageData( e.data.pixels, image.width, image.height )
             context.state.context.dest.putImageData( imageData, 0, 0 )
 
-            if (state.useISOData)
-                store.dispatch(changeThreshold(e.data.threshold))
+            if (context.props.useISOData)
+                context.props.changeThreshold(e.data.threshold)
         }
-    },
+    }
 
-    render : function () {
+    render () {
         return (
             <div className='row'>
                 <div className='col-xs-12 col-sm-6'>
@@ -89,4 +99,8 @@ export default React.createClass({
         )
     }
 
-})
+}
+
+Canvas.propTypes = {
+    changeThreshold : PropTypes.func,
+}

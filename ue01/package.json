@@ -90,9 +90,10 @@
         "module": {
             "loaders": [{
                 "exclude": "/node_modules/",
-                "loaders": [
-                    "babel"
-                ]
+                "loader": "babel",
+                "query": {
+                    "stage": 1
+                }
             }]
         },
         "devtool": "source-map",

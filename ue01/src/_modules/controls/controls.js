@@ -1,33 +1,33 @@
-import React from 'react'
+import React, {Component, PropTypes} from 'react'
+import {bindActionCreators} from 'redux'
+import {connect} from 'react-redux';
+import {changeOutline, changeMethod, changeThreshold} from '../../_flux/actions'
 
 import PictureSelect from '../pictureSelect/pictureSelect'
 
-import {store} from '../../_flux/store'
-import * as actions from '../../_flux/actions'
+@connect(
+    state => ({
+        useOutline : state.controls.useOutline,
+        useISOData : state.controls.useISOData,
+        threshold : state.controls.threshold,
+    }),
+    dispatch => bindActionCreators({changeOutline, changeMethod, changeThreshold}, dispatch))
 
-export default React.createClass({
+export default class Controls extends Component {
 
-    componentDidMount : function() {
-        store.subscribe(() => {
-            let state = store.getState().controls
-            this.refs['controls-threshold'].value = state.threshold
-            this.forceUpdate()
-        })
-    },
+    outlineChanged (event) {
+        this.props.changeOutline(event.target.checked)
+    }
 
-    outlineChanged : function (event) {
-        store.dispatch(actions.changeOutline( event.target.checked ))
-    },
+    methodChanged (event) {
+        this.props.changeMethod(event.target.checked)
+    }
 
-    methodChanged : function (event) {
-        store.dispatch(actions.changeMethod( event.target.checked ))
-    },
+    thresholdChanged (event) {
+        this.props.changeThreshold(event.target.value)
+    }
 
-    thresholdChanged : function (event) {
-        store.dispatch(actions.changeThreshold( event.target.value ))
-    },
-
-    render : function() {
+    render () {
 
         return (
             <div id='controls'>
@@ -41,24 +41,24 @@ export default React.createClass({
                     <div className='controls-wrapper center-content col-xs-6 col-sm-2'>
                         <label>
                             Outline
-                            <input type='checkbox' onChange={this.outlineChanged} checked={store.getState().controls.useOutline}/>
+                            <input type='checkbox' onChange={this.outlineChanged.bind(this)} checked={this.props.useOutline}/>
                         </label>
                     </div>
 
                     <div className='controls-wrapper center-content col-xs-6 col-sm-2'>
                         <label>
                             IsoData
-                            <input type='checkbox' onChange={this.methodChanged} checked={store.getState().controls.useISOData}/>
+                            <input type='checkbox' onChange={this.methodChanged.bind(this)} checked={this.props.useISOData}/>
                         </label>
                     </div>
 
                     <div className='controls-wrapper center-content col-xs-9 col-sm-6'>
-                        <input id='input-slider' type='range' min='0' max='255' value={store.getState().controls.threshold} onChange={this.thresholdChanged} disabled={store.getState().controls.useISOData} />
+                        <input id='input-slider' type='range' min='0' max='255' value={this.props.threshold} onChange={this.thresholdChanged.bind(this)} disabled={this.props.useISOData} />
                     </div>
 
 
                     <div className='controls-wrapper center-content col-xs-3 col-sm-2'>
-                        <input id='controls-threshold' readOnly ref='controls-threshold' type='text' value={store.getState().controls.threshold} />
+                        <input id='controls-threshold' readOnly ref='controls-threshold' type='text' value={this.props.threshold} />
                     </div>
 
                 </div>
@@ -68,4 +68,10 @@ export default React.createClass({
 
     }
 
-})
+}
+
+Controls.propTypes = {
+    changeOutline : PropTypes.func,
+    changeMethod : PropTypes.func,
+    changeThreshold : PropTypes.func,
+}
