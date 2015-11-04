@@ -58,7 +58,7 @@ export default class Controls extends Component {
 
 
                     <div className='controls-wrapper center-content col-xs-3 col-sm-2'>
-                        <input id='controls-threshold' readOnly ref='controls-threshold' type='text' value={this.props.threshold} />
+                        <input id='controls-threshold' readOnly type='text' value={this.props.threshold} />
                     </div>
 
                 </div>
