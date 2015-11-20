@@ -49,9 +49,11 @@ export default class Canvas extends Component {
 
         return new Promise( resolve => {
             image.onload = () => {
+                image.width += 2
+                image.height += 2
                 this.refs.src.width = image.width
                 this.refs.src.height = image.height
-                this.state.context.src.drawImage(image, 0, 0)
+                this.state.context.src.drawImage(image, 1, 1)
                 resolve(image)
             }
         })
@@ -64,6 +66,15 @@ export default class Canvas extends Component {
         this.refs.dest.style.width = `${this.props.zoom * 100}%`
 
         let pixels = this.state.context.src.getImageData( 0, 0, image.width, image.height ).data
+
+        for (let i = 3; i < pixels.length; i += 4) {
+            if (pixels[i] === 0) {
+                pixels[i - 3] = 255
+                pixels[i - 2] = 255
+                pixels[i - 1] = 255
+                pixels[i] = 255
+            }
+        }
 
         this.worker = new Worker()
         this.worker.postMessage({

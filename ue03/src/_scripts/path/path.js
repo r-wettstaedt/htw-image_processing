@@ -1,4 +1,4 @@
-import {Edge, direction} from './edge'
+import {Edge, direction} from '../edge'
 
 export default function(pixels, image, cb) {
 
@@ -6,12 +6,16 @@ export default function(pixels, image, cb) {
 
     let path = []
 
-    let pos = 0
-    let pixel = pixels[pos]
-    while (pixel > 0) {
-        pos++
+    let pos, pixel
+    for (pos = 0; pos < pixels.length / 4; pos++) {
         pixel = pixels[pos * 4 + 4]
+        if (pixel === 0) {
+            break
+        }
     }
+
+    if (typeof pixel === 'undefined')
+        return
 
     path.push(new Edge(pos, direction.down))
     let pathPixels = pixels.slice(0)
@@ -43,7 +47,7 @@ export default function(pixels, image, cb) {
                     path.push(new Edge(right, lastEdge.dir))
 
                 else if (leftPixel === 255 && rightPixel === 255) // left
-                    path.push(new Edge(right, direction.left))
+                    path.push(new Edge(left, direction.left))
 
                 else // right
                     path.push(new Edge(lastEdge.pos, direction.right))
@@ -61,7 +65,7 @@ export default function(pixels, image, cb) {
                     path.push(new Edge(right, lastEdge.dir))
 
                 else if (leftPixel === 255 && rightPixel === 255) // left
-                    path.push(new Edge(right, direction.up))
+                    path.push(new Edge(left, direction.up))
 
                 else // right
                     path.push(new Edge(lastEdge.pos, direction.down))
@@ -79,7 +83,7 @@ export default function(pixels, image, cb) {
                     path.push(new Edge(right, lastEdge.dir))
 
                 else if (leftPixel === 255 && rightPixel === 255) // left
-                    path.push(new Edge(right, direction.right))
+                    path.push(new Edge(left, direction.right))
 
                 else // right
                     path.push(new Edge(lastEdge.pos, direction.left))
@@ -97,7 +101,7 @@ export default function(pixels, image, cb) {
                     path.push(new Edge(right, lastEdge.dir))
 
                 else if (leftPixel === 255 && rightPixel === 255) // left
-                    path.push(new Edge(right, direction.down))
+                    path.push(new Edge(left, direction.down))
 
                 else // right
                     path.push(new Edge(lastEdge.pos, direction.up))
@@ -119,5 +123,7 @@ export default function(pixels, image, cb) {
     }
 
     cb(pathPixels)
+    path.pop()
+    return path
 
 }

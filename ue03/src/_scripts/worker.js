@@ -1,5 +1,5 @@
 import {binarize} from './colorConvert'
-import path from './path'
+import pathDecomposition from './path/pathDecomposition'
 
 onmessage = event => {
 
@@ -13,7 +13,7 @@ onmessage = event => {
 
     startTime = new Date()
 
-    path(pixels, image, pixels => {
+    pathDecomposition(pixels, image, pixels => {
         postMessage({ pixels : pixels })
     })
 
