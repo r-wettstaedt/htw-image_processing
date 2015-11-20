@@ -1,7 +1,7 @@
 import React, {Component, PropTypes} from 'react'
 import {bindActionCreators} from 'redux'
 import {connect} from 'react-redux';
-import {changeMethod, changeVisual} from '../../_flux/actions'
+import {changeVisual, changePixels, changePath, changeZoom} from '../../_flux/actions'
 
 import PictureSelect from '../pictureSelect/pictureSelect'
 
@@ -11,8 +11,10 @@ import PictureSelect from '../pictureSelect/pictureSelect'
 
         showPixels : state.controls.showPixels,
         showPath : state.controls.showPath,
+
+        zoom : state.controls.zoom,
     }),
-    dispatch => bindActionCreators({changeMethod, changeVisual}, dispatch))
+    dispatch => bindActionCreators({changeVisual, changePixels, changePath, changeZoom}, dispatch))
 
 export default class Controls extends Component {
 
@@ -26,6 +28,10 @@ export default class Controls extends Component {
 
     pathChanged (event) {
         this.props.changePath(event.target.checked)
+    }
+
+    zoomChanged (event) {
+        this.props.changeZoom(event.target.value)
     }
 
     render () {
@@ -60,6 +66,14 @@ export default class Controls extends Component {
                         </label>
                     </div>
 
+                    <div className='controls-wrapper center-content col-xs-12'>
+                        <label>
+                            Zoom
+                            <input type='range' min='1' max='10' step='0.5' value={this.props.zoom} onChange={this.zoomChanged.bind(this)} />
+                            {this.props.zoom}%
+                        </label>
+                    </div>
+
                 </div>
 
             </div>
@@ -73,4 +87,5 @@ Controls.propTypes = {
     changeVisual : PropTypes.func,
     changePixels : PropTypes.func,
     changePath : PropTypes.func,
+    changeZoom : PropTypes.func,
 }

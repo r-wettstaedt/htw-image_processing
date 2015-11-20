@@ -7,6 +7,7 @@ export const CHANGE_ACTIVE_IMAGE = 'CHANGE_IMAGE'
 export const CHANGE_VISUAL = 'CHANGE_VISUAL'
 export const CHANGE_PIXELS = 'CHANGE_PIXELS'
 export const CHANGE_PATH = 'CHANGE_PATH'
+export const CHANGE_ZOOM = 'CHANGE_ZOOM'
 
 
 /*
@@ -45,6 +46,13 @@ export function changePath (usePath) {
     return {
         type: CHANGE_PATH,
         usePath
+    }
+}
+
+export function changeZoom (zoom) {
+    return {
+        type: CHANGE_ZOOM,
+        zoom
     }
 }
 

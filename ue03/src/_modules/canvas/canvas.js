@@ -13,6 +13,8 @@ let Worker = require('worker!../../_scripts/worker')
 
         showPixels : state.controls.showPixels,
         showPath : state.controls.showPath,
+
+        zoom : state.controls.zoom,
     })
 )
 
@@ -58,6 +60,8 @@ export default class Canvas extends Component {
     drawDest (image) {
         if (this.worker)
             this.worker.terminate()
+
+        this.refs.dest.style.width = `${this.props.zoom * 100}%`
 
         let pixels = this.state.context.src.getImageData( 0, 0, image.width, image.height ).data
 

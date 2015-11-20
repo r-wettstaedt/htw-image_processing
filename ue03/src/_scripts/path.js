@@ -10,55 +10,114 @@ export default function(pixels, image, cb) {
     let pixel = pixels[pos]
     while (pixel > 0) {
         pos++
-        pixel = pixels[pos * 4]
+        pixel = pixels[pos * 4 + 4]
     }
 
     path.push(new Edge(pos, direction.down))
+    let pathPixels = pixels.slice(0)
+    let lastEdge = 0
 
-    while (true) {
-        let lastEdge = path[path.length - 1]
+    let it = 0
+    while (lastEdge.pos !== path[0].pos || lastEdge.dir !== path[0].dir) {
 
-        let left, right
+        lastEdge = path[path.length - 1]
+
+        pathPixels[lastEdge.pos * 4] = 255
+        pathPixels[lastEdge.pos * 4 + 1] = 0
+        pathPixels[lastEdge.pos * 4 + 2] = 0
+        pathPixels[lastEdge.pos * 4 + 3] = 128
+        cb(pathPixels)
+
+        it++
+
+        let left, right, leftPixel, rightPixel
         switch (lastEdge.dir) {
             case direction.up:
-                left = 4 * lastEdge.pos - 4 * image.width
-                right = left + 4
+                left = lastEdge.pos - image.width - 1
+                right = left + 1
+
+                leftPixel = pixels[left * 4]
+                rightPixel = pixels[right * 4]
+
+                if (leftPixel === 0 && rightPixel === 255) // forward
+                    path.push(new Edge(right, lastEdge.dir))
+
+                else if (leftPixel === 255 && rightPixel === 255) // left
+                    path.push(new Edge(right, direction.left))
+
+                else // right
+                    path.push(new Edge(lastEdge.pos, direction.right))
+
                 break
 
             case direction.right:
-                left = 4 * lastEdge.pos + 4
-                right = left + image.width
+                right = lastEdge.pos + 1
+                left = right - image.width
+
+                leftPixel = pixels[left * 4]
+                rightPixel = pixels[right * 4]
+
+                if (leftPixel === 0 && rightPixel === 255) // forward
+                    path.push(new Edge(right, lastEdge.dir))
+
+                else if (leftPixel === 255 && rightPixel === 255) // left
+                    path.push(new Edge(right, direction.up))
+
+                else // right
+                    path.push(new Edge(lastEdge.pos, direction.down))
+
                 break
 
             case direction.down:
-                left = 4 * lastEdge.pos + 4 * image.width
-                right = left - 4
+                left = lastEdge.pos + image.width + 1
+                right = left - 1
+
+                leftPixel = pixels[left * 4]
+                rightPixel = pixels[right * 4]
+
+                if (leftPixel === 0 && rightPixel === 255) // forward
+                    path.push(new Edge(right, lastEdge.dir))
+
+                else if (leftPixel === 255 && rightPixel === 255) // left
+                    path.push(new Edge(right, direction.right))
+
+                else // right
+                    path.push(new Edge(lastEdge.pos, direction.left))
+
                 break
 
             case direction.left:
-                left = 4 * lastEdge.pos - 4
-                right = left - image.width
+                right = lastEdge.pos - 1
+                left = right + image.width
+
+                leftPixel = pixels[left * 4]
+                rightPixel = pixels[right * 4]
+
+                if (leftPixel === 0 && rightPixel === 255) // forward
+                    path.push(new Edge(right, lastEdge.dir))
+
+                else if (leftPixel === 255 && rightPixel === 255) // left
+                    path.push(new Edge(right, direction.down))
+
+                else // right
+                    path.push(new Edge(lastEdge.pos, direction.up))
+
                 break
         }
 
-        let tmpPixels = pixels.slice(0)
-        tmpPixels[pos * 4] = 255
-        tmpPixels[left + 1] = 128
-        tmpPixels[right + 2] = 128
+        let tmpPixels = pathPixels.slice(0)
+        tmpPixels[left * 4] = 255
+        tmpPixels[left * 4 + 1] = 255
+        tmpPixels[left * 4 + 2] = 0
+        tmpPixels[right * 4] = 0
+        tmpPixels[right * 4 + 1] = 128
+        tmpPixels[right * 4 + 2] = 255
         cb(tmpPixels)
 
-        let leftPixel = pixels[left]
-        let rightPixel = pixels[right]
-        if (leftPixel === 0 && rightPixel === 0) {
-            path.push(new Edge(pos , (lastEdge.dir + 1) % 4))
-        } else if (leftPixel === 0 && rightPixel === 255) {
-            path.push(new Edge( , lastEdge.dir))
-        }
-        else
-            path.push(new Edge( , (Math.abs(lastEdge - 1)) % 4))
+        lastEdge = path[path.length - 1]
 
-
-        break
     }
+
+    cb(pathPixels)
 
 }

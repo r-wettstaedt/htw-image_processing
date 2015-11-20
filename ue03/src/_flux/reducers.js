@@ -11,10 +11,12 @@ const initialState = {
         `${location.pathname}images/tools.png`,
     ],
     activeImage : 0,
-    useVisual : false,
+    useVisual : true,
 
     showPixels : true,
     showPath : true,
+
+    zoom : 1,
 }
 
 function controls (state = initialState, action) {
@@ -44,6 +46,11 @@ function controls (state = initialState, action) {
         case actions.CHANGE_PATH:
             return Object.assign({}, state, {
                 usePath : action.usePath,
+            })
+
+        case actions.CHANGE_ZOOM:
+            return Object.assign({}, state, {
+                zoom : action.zoom,
             })
 
         default:
