@@ -9,11 +9,11 @@ let Worker = require('worker!../../_scripts/worker')
     state => ({
         activeImage : state.controls.activeImage,
         images : state.controls.images,
-        useVisual : state.controls.useVisual,
+        imageChanged : state.controls.imageChanged,
 
+        useVisual : state.controls.useVisual,
         showPixels : state.controls.showPixels,
         showPath : state.controls.showPath,
-
         zoom : state.controls.zoom,
     })
 )
@@ -25,7 +25,6 @@ export default class Canvas extends Component {
             context : {
                 src : this.refs.src.getContext('2d'),
                 dest : this.refs.dest.getContext('2d'),
-                tmp :  this.refs.tmp.getContext('2d'),
             }
         })
         this.drawCanvas.bind(this)()
@@ -35,10 +34,14 @@ export default class Canvas extends Component {
     }
 
     drawCanvas () {
-        this.drawSrc().then( image => {
-            this.drawDest.bind(this)(image)
-            this.forceUpdate()
-        })
+        if (this.props.imageChanged)
+            this.drawSrc().then( image => {
+                this.drawDest.bind(this)(image)
+                this.forceUpdate()
+            })
+
+        else
+            this.adjustDest()
     }
 
     drawSrc () {
@@ -62,8 +65,6 @@ export default class Canvas extends Component {
     drawDest (image) {
         if (this.worker)
             this.worker.terminate()
-
-        this.refs.dest.style.width = `${this.props.zoom * 100}%`
 
         let pixels = this.state.context.src.getImageData( 0, 0, image.width, image.height ).data
 
@@ -93,16 +94,58 @@ export default class Canvas extends Component {
 
         this.refs.dest.width = image.width
         this.refs.dest.height = image.height
-        this.refs.tmp.width = image.width
-        this.refs.tmp.height = image.height
 
         let context = this
         this.worker.onmessage = event => {
-            let imageData = new ImageData( event.data.pixels, image.width, image.height )
 
-            context.state.context.dest.putImageData( imageData, 0, 0 )
+            if (event.data.pixels) {
+                let imageData = new ImageData( event.data.pixels, image.width, image.height )
+                context.state.context.dest.putImageData( imageData, 0, 0 )
+            } else if (event.data.path) {
+                context.setState({
+                    pixels : pixels,
+                    path : event.data.path,
+                    image : {
+                        width : image.width,
+                        height : image.height,
+                    }
+                })
+                context.adjustDest()
+            }
+
         }
     }
+
+    adjustDest () {
+        this.refs.dest.style.width = `${this.props.zoom * 100}%`
+
+        let pixels = new Uint8ClampedArray(this.state.pixels.length)
+        pixels.fill(255, 0, pixels.length)
+
+        for (let i = 0; i < pixels.length; i += 4) {
+            let c = 0
+            let r, g, b
+            r = g = b = 0
+
+            if (this.props.showPixels) {
+                pixels[i] = this.state.pixels[i]
+                pixels[i + 1] = this.state.pixels[i + 1]
+                pixels[i + 2] = this.state.pixels[i + 2]
+            }
+            if (this.props.showPath) {
+                if (this.state.path[i] < 255) {
+                    pixels[i] = this.state.path[i]
+                    pixels[i + 1] = this.state.path[i + 1]
+                    pixels[i + 2] = this.state.path[i + 2]
+                }
+            }
+
+            pixels[i + 3] = 255
+        }
+        let imageData = new ImageData( pixels, this.state.image.width, this.state.image.height )
+        this.state.context.dest.putImageData( imageData, 0, 0 )
+    }
+
 
     render () {
         if (this.refs.src) {

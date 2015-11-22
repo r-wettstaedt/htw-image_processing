@@ -1,7 +1,6 @@
 import { combineReducers } from 'redux'
 import * as actions from './actions'
 
-
 const initialState = {
     images : [
         `${location.pathname}images/klein copy.png`,
@@ -11,6 +10,8 @@ const initialState = {
         `${location.pathname}images/tools.png`,
     ],
     activeImage : 0,
+    imageChanged : true,
+
     useVisual : true,
 
     showPixels : true,
@@ -26,31 +27,37 @@ function controls (state = initialState, action) {
             return Object.assign({}, state, {
                 images : [action.src, ...state.images],
                 activeImage : 0,
+                imageChanged : true,
             })
 
         case actions.CHANGE_ACTIVE_IMAGE:
             return Object.assign({}, state, {
                 activeImage : action.index,
+                imageChanged : true,
             })
 
         case actions.CHANGE_VISUAL:
             return Object.assign({}, state, {
                 useVisual : action.useVisual,
+                imageChanged : true,
             })
 
         case actions.CHANGE_PIXELS:
             return Object.assign({}, state, {
                 showPixels : action.showPixels,
+                imageChanged : false,
             })
 
         case actions.CHANGE_PATH:
             return Object.assign({}, state, {
                 showPath : action.showPath,
+                imageChanged : false,
             })
 
         case actions.CHANGE_ZOOM:
             return Object.assign({}, state, {
                 zoom : action.zoom,
+                imageChanged : false,
             })
 
         default:

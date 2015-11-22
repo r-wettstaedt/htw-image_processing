@@ -45,21 +45,21 @@ export default class Controls extends Component {
 
                 <div className='row'>
 
-                    <div className='controls-wrapper center-content col-xs-6 col-sm-2'>
+                    <div className='controls-wrapper center-content col-xs-6 col-sm-3'>
                         <label>
                             Visual
                             <input type='checkbox' onChange={this.visualChanged.bind(this)} checked={this.props.useVisual} />
                         </label>
                     </div>
 
-                    <div className='controls-wrapper center-content col-xs-6 col-sm-2'>
+                    <div className='controls-wrapper center-content col-xs-6 col-sm-3'>
                         <label>
                             Show Pixels
                             <input type='checkbox' onChange={this.pixelsChanged.bind(this)} checked={this.props.showPixels} />
                         </label>
                     </div>
 
-                    <div className='controls-wrapper center-content col-xs-6 col-sm-2'>
+                    <div className='controls-wrapper center-content col-xs-6 col-sm-3'>
                         <label>
                             Show Path
                             <input type='checkbox' onChange={this.pathChanged.bind(this)} checked={this.props.showPath} />
@@ -70,7 +70,9 @@ export default class Controls extends Component {
                         <label>
                             Zoom
                             <input type='range' min='1' max='10' step='0.5' value={this.props.zoom} onChange={this.zoomChanged.bind(this)} />
-                            {this.props.zoom}%
+                            <p className='zoom-label'>
+                                {this.props.zoom}%
+                            </p>
                         </label>
                     </div>
 

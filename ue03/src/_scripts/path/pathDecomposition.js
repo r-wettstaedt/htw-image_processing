@@ -1,47 +1,36 @@
 import {direction} from '../edge'
 import path from './path'
 
-function draw (pixels, config, image, cb, paths) {
-    let dstPixels
-    if (config.showPixels)
-        dstPixels = pixels
-    else {
-        dstPixels = new Uint8ClampedArray(pixels.length)
-        dstPixels.fill(255, 0, pixels.length)
-    }
+function createPathPixels (pixels, config, image, notify, resolve, outerPaths) {
+    let pathPixels = new Uint8ClampedArray(pixels.length)
+    pathPixels.fill(255, 0, pixels.length)
 
-    if (config.showPath) {
-        for (let path of paths) {
+    for (let path of outerPaths) {
+        for (let edge of path) {
 
-            for (let edge of path) {
+            let pos = edge.pos * 4
 
-                let pos = edge.pos * 4
-
-                dstPixels[pos] = (dstPixels[pos] + 255) / 2
-                dstPixels[pos + 1] = dstPixels[pos] / 4
-                dstPixels[pos + 2] = dstPixels[pos] / 4
-
-            }
-
+            pathPixels[pos] = 254
+            pathPixels[pos + 1] = 0
+            pathPixels[pos + 2] = 0
         }
     }
 
-    cb(dstPixels)
+    resolve(pathPixels)
 }
 
-export default function(pixels, config, image, cb) {
+export default function(pixels, config, image, notify, resolve) {
 
-    let paths = []
+    let outerPaths = []
+    let innerPaths = []
     let invertedPixels = pixels
 
-    let it = 0
     while (true) {
-        it++
 
-        let lastPath = path(invertedPixels, config, image, cb)
+        let lastPath = path(invertedPixels, config, image, notify)
         if (! lastPath)
             break
-        paths.push(lastPath)
+        outerPaths.push(lastPath)
 
         invertedPixels = invertedPixels.slice(0)
 
@@ -53,7 +42,7 @@ export default function(pixels, config, image, cb) {
                 invertedPixels[pos * 4 + 2] = 128
 
                 if (config.useVisual)
-                    cb(invertedPixels)
+                    notify(invertedPixels)
 
                 pos++
 
@@ -64,10 +53,13 @@ export default function(pixels, config, image, cb) {
                     invertedPixels[_pos + 2] = Math.abs(invertedPixels[_pos + 2] - 255)
 
                     pos++
+
+                    if (config.useVisual)
+                        notify(invertedPixels)
                 }
 
                 if (config.useVisual)
-                    cb(invertedPixels)
+                    notify(invertedPixels)
 
             }
         }
@@ -81,10 +73,10 @@ export default function(pixels, config, image, cb) {
         }
 
         if (config.useVisual)
-            cb(invertedPixels)
+            notify(invertedPixels)
 
     }
 
-    draw.apply(null, [...arguments, paths])
+    createPathPixels.apply(null, [...arguments, outerPaths])
 
 }

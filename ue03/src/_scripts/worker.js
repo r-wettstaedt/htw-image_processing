@@ -15,13 +15,14 @@ onmessage = event => {
 
     startTime = new Date()
 
-    pathDecomposition(pixels, config, image, pixels => {
+    pathDecomposition(pixels, config, image,
+        pixels => {
         postMessage({ pixels : pixels })
+    }, pathPixels => {
+        postMessage({ path : pathPixels })
     })
 
     endTime = new Date()
     console.log(`Took ${endTime-startTime}ms to complete`)
-
-    // postMessage({ pixels : pixels })
 
 }
