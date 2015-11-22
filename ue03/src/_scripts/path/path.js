@@ -1,21 +1,8 @@
 import {Edge, direction} from '../edge'
 
-export default function(pixels, config, image, cb) {
-
-    console.log("msg")
+export default function(pixels, pos, config, image, cb) {
 
     let path = []
-
-    let pos, pixel
-    for (pos = 0; pos < pixels.length / 4; pos++) {
-        pixel = pixels[pos * 4 + 4]
-        if (pixel === 0) {
-            break
-        }
-    }
-
-    if (typeof pixel === 'undefined')
-        return
 
     path.push(new Edge(pos, direction.down))
     let pathPixels = pixels.slice(0)

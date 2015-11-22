@@ -23,6 +23,6 @@ onmessage = event => {
     })
 
     endTime = new Date()
-    console.log(`Took ${endTime-startTime}ms to complete`)
+    console.log(`Path Decomposition took ${endTime-startTime}ms to complete`)
 
 }

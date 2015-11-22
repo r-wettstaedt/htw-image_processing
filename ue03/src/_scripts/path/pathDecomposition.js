@@ -1,7 +1,7 @@
 import {direction} from '../edge'
 import path from './path'
 
-function createPathPixels (pixels, config, image, notify, resolve, outerPaths) {
+function createPathPixels (pixels, config, image, notify, resolve, outerPaths, innerPaths) {
     let pathPixels = new Uint8ClampedArray(pixels.length)
     pathPixels.fill(255, 0, pixels.length)
 
@@ -12,6 +12,16 @@ function createPathPixels (pixels, config, image, notify, resolve, outerPaths) {
 
             pathPixels[pos] = 254
             pathPixels[pos + 1] = 0
+            pathPixels[pos + 2] = 0
+        }
+    }
+    for (let path of innerPaths) {
+        for (let edge of path) {
+
+            let pos = edge.pos * 4
+
+            pathPixels[pos] = 254
+            pathPixels[pos + 1] = 128
             pathPixels[pos + 2] = 0
         }
     }
@@ -27,10 +37,27 @@ export default function(pixels, config, image, notify, resolve) {
 
     while (true) {
 
-        let lastPath = path(invertedPixels, config, image, notify)
-        if (! lastPath)
+        let pos, alpha
+        let found = false
+        for (pos = 0; pos < invertedPixels.length / 4; pos++) {
+            let pixel = invertedPixels[pos * 4 + 4]
+            alpha = invertedPixels[pos * 4 + 7]
+            if (pixel === 0) {
+                found = true
+                break
+            }
+        }
+
+        if (! found)
             break
-        outerPaths.push(lastPath)
+
+        let lastPath = path(invertedPixels, pos, config, image, notify)
+
+        if (alpha === 0)
+            innerPaths.push(lastPath)
+        else
+            outerPaths.push(lastPath)
+
 
         invertedPixels = invertedPixels.slice(0)
 
@@ -51,11 +78,9 @@ export default function(pixels, config, image, notify, resolve) {
                     invertedPixels[_pos] = Math.abs(invertedPixels[_pos] - 255)
                     invertedPixels[_pos + 1] = Math.abs(invertedPixels[_pos + 1] - 255)
                     invertedPixels[_pos + 2] = Math.abs(invertedPixels[_pos + 2] - 255)
+                    invertedPixels[_pos + 3] = Math.abs(invertedPixels[_pos + 3] - 255)
 
                     pos++
-
-                    if (config.useVisual)
-                        notify(invertedPixels)
                 }
 
                 if (config.useVisual)
@@ -77,6 +102,6 @@ export default function(pixels, config, image, notify, resolve) {
 
     }
 
-    createPathPixels.apply(null, [...arguments, outerPaths])
+    createPathPixels.apply(null, [...arguments, outerPaths, innerPaths])
 
 }

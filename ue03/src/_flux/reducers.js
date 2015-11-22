@@ -12,7 +12,7 @@ const initialState = {
     activeImage : 0,
     imageChanged : true,
 
-    useVisual : true,
+    useVisual : false,
 
     showPixels : true,
     showPath : true,
