@@ -1,7 +1,35 @@
 import {direction} from '../edge'
 import path from './path'
 
-export default function(pixels, image, cb) {
+function draw (pixels, config, image, cb, paths) {
+    let dstPixels
+    if (config.showPixels)
+        dstPixels = pixels
+    else {
+        dstPixels = new Uint8ClampedArray(pixels.length)
+        dstPixels.fill(255, 0, pixels.length)
+    }
+
+    if (config.showPath) {
+        for (let path of paths) {
+
+            for (let edge of path) {
+
+                let pos = edge.pos * 4
+
+                dstPixels[pos] = (dstPixels[pos] + 255) / 2
+                dstPixels[pos + 1] = dstPixels[pos] / 4
+                dstPixels[pos + 2] = dstPixels[pos] / 4
+
+            }
+
+        }
+    }
+
+    cb(dstPixels)
+}
+
+export default function(pixels, config, image, cb) {
 
     let paths = []
     let invertedPixels = pixels
@@ -10,7 +38,7 @@ export default function(pixels, image, cb) {
     while (true) {
         it++
 
-        let lastPath = path(invertedPixels, image, cb)
+        let lastPath = path(invertedPixels, config, image, cb)
         if (! lastPath)
             break
         paths.push(lastPath)
@@ -23,7 +51,9 @@ export default function(pixels, image, cb) {
                 invertedPixels[pos * 4] = 128
                 invertedPixels[pos * 4 + 1] = 128
                 invertedPixels[pos * 4 + 2] = 128
-                cb(invertedPixels)
+
+                if (config.useVisual)
+                    cb(invertedPixels)
 
                 pos++
 
@@ -35,7 +65,9 @@ export default function(pixels, image, cb) {
 
                     pos++
                 }
-                cb(invertedPixels)
+
+                if (config.useVisual)
+                    cb(invertedPixels)
 
             }
         }
@@ -48,8 +80,11 @@ export default function(pixels, image, cb) {
             invertedPixels[i + 2] = 255
         }
 
-        cb(invertedPixels)
+        if (config.useVisual)
+            cb(invertedPixels)
 
     }
+
+    draw.apply(null, [...arguments, paths])
 
 }

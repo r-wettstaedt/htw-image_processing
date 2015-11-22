@@ -40,12 +40,12 @@ function controls (state = initialState, action) {
 
         case actions.CHANGE_PIXELS:
             return Object.assign({}, state, {
-                usePixels : action.usePixels,
+                showPixels : action.showPixels,
             })
 
         case actions.CHANGE_PATH:
             return Object.assign({}, state, {
-                usePath : action.usePath,
+                showPath : action.showPath,
             })
 
         case actions.CHANGE_ZOOM:

@@ -1,6 +1,6 @@
 import {Edge, direction} from '../edge'
 
-export default function(pixels, image, cb) {
+export default function(pixels, config, image, cb) {
 
     console.log("msg")
 
@@ -30,7 +30,9 @@ export default function(pixels, image, cb) {
         pathPixels[lastEdge.pos * 4 + 1] = 0
         pathPixels[lastEdge.pos * 4 + 2] = 0
         pathPixels[lastEdge.pos * 4 + 3] = 128
-        cb(pathPixels)
+
+        if (config.useVisual)
+            cb(pathPixels)
 
         it++
 
@@ -109,20 +111,24 @@ export default function(pixels, image, cb) {
                 break
         }
 
-        let tmpPixels = pathPixels.slice(0)
-        tmpPixels[left * 4] = 255
-        tmpPixels[left * 4 + 1] = 255
-        tmpPixels[left * 4 + 2] = 0
-        tmpPixels[right * 4] = 0
-        tmpPixels[right * 4 + 1] = 128
-        tmpPixels[right * 4 + 2] = 255
-        cb(tmpPixels)
+        if (config.useVisual) {
+            let tmpPixels = pathPixels.slice(0)
+            tmpPixels[left * 4] = 255
+            tmpPixels[left * 4 + 1] = 255
+            tmpPixels[left * 4 + 2] = 0
+            tmpPixels[right * 4] = 0
+            tmpPixels[right * 4 + 1] = 128
+            tmpPixels[right * 4 + 2] = 255
+            cb(tmpPixels)
+        }
 
         lastEdge = path[path.length - 1]
 
     }
 
-    cb(pathPixels)
+    if (config.useVisual)
+        cb(pathPixels)
+
     path.pop()
     return path
 

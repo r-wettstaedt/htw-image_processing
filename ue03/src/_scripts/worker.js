@@ -11,9 +11,11 @@ onmessage = event => {
     let startTime
     let endTime
 
+    postMessage({ pixels : pixels })
+
     startTime = new Date()
 
-    pathDecomposition(pixels, image, pixels => {
+    pathDecomposition(pixels, config, image, pixels => {
         postMessage({ pixels : pixels })
     })
 

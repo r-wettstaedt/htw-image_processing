@@ -35,17 +35,17 @@ export function changeVisual (useVisual) {
     }
 }
 
-export function changePixels (usePixels) {
+export function changePixels (showPixels) {
     return {
         type: CHANGE_PIXELS,
-        usePixels
+        showPixels
     }
 }
 
-export function changePath (usePath) {
+export function changePath (showPath) {
     return {
         type: CHANGE_PATH,
-        usePath
+        showPath
     }
 }
 
