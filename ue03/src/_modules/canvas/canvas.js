@@ -136,6 +136,8 @@ export default class Canvas extends Component {
 
         let startTime = new Date()
 
+        this.state.context.dest.clearRect(0, 0, this.refs.dest.width, this.refs.dest.height)
+
         if (this.props.showPixels) {
             this.state.context.dest.scale(this.state.scale, this.state.scale)
             this.state.context.dest.imageSmoothingEnabled = false
