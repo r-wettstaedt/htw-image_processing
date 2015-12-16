@@ -18,8 +18,8 @@ onmessage = event => {
     pathDecomposition(pixels, config, image,
         pixels => {
         postMessage({ pixels : pixels })
-    }, pathPixels => {
-        postMessage({ path : pathPixels })
+    }, (outerPaths, innerPaths) => {
+        postMessage({ outerPaths : outerPaths, innerPaths : innerPaths })
     })
 
     endTime = new Date()

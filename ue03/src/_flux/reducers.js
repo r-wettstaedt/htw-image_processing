@@ -3,8 +3,9 @@ import * as actions from './actions'
 
 const initialState = {
     images : [
-        `${location.pathname}images/klein copy.png`,
+        // `${location.pathname}images/klein copy.png`,
         `${location.pathname}images/klein.png`,
+        // `${location.pathname}images/test3 copy.png`,
         `${location.pathname}images/test3.png`,
         `${location.pathname}images/sample.png`,
         `${location.pathname}images/tools.png`,

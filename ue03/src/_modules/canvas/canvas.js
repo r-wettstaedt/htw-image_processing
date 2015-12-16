@@ -2,6 +2,7 @@ import React, {Component, PropTypes} from 'react'
 import {bindActionCreators} from 'redux'
 import {connect} from 'react-redux';
 import {store} from '../../_flux/store'
+import {direction} from '../../_scripts/edge'
 
 let Worker = require('worker!../../_scripts/worker')
 
@@ -24,6 +25,7 @@ export default class Canvas extends Component {
         this.setState({
             context : {
                 src : this.refs.src.getContext('2d'),
+                tmp : this.refs.tmp.getContext('2d'),
                 dest : this.refs.dest.getContext('2d'),
             }
         })
@@ -41,7 +43,7 @@ export default class Canvas extends Component {
             })
 
         else
-            this.adjustDest()
+            this.drawContours()
     }
 
     drawSrc () {
@@ -92,58 +94,85 @@ export default class Canvas extends Component {
             }
         })
 
-        this.refs.dest.width = image.width
-        this.refs.dest.height = image.height
+        let scale = parseInt(window.getComputedStyle(this.refs.dest).width) / this.props.zoom / image.width
+        scale = parseInt(scale)
+        scale = Math.max(1, scale)
+        this.setState({ scale : scale })
+
+        this.refs.tmp.width = image.width
+        this.refs.tmp.height = image.height
+        this.refs.dest.width = image.width * scale
+        this.refs.dest.height = image.height * scale
 
         let context = this
         this.worker.onmessage = event => {
 
             if (event.data.pixels) {
                 let imageData = new ImageData( event.data.pixels, image.width, image.height )
-                context.state.context.dest.putImageData( imageData, 0, 0 )
-            } else if (event.data.path) {
+                context.state.context.tmp.putImageData(imageData, 0, 0)
+
+                context.state.context.dest.scale(scale, scale)
+                context.state.context.dest.imageSmoothingEnabled = false
+                context.state.context.dest.drawImage(context.refs.tmp, 0, 0)
+                context.state.context.dest.scale(1 / scale, 1 / scale)
+            } else {
                 context.setState({
                     pixels : pixels,
-                    path : event.data.path,
+                    outerPaths : event.data.outerPaths,
+                    innerPaths : event.data.innerPaths,
                     image : {
                         width : image.width,
                         height : image.height,
                     }
                 })
-                context.adjustDest()
+                context.drawContours()
             }
 
         }
     }
 
-    adjustDest () {
+    drawContours () {
         this.refs.dest.style.width = `${this.props.zoom * 100}%`
 
-        let pixels = new Uint8ClampedArray(this.state.pixels.length)
-        pixels.fill(255, 0, pixels.length)
+        let startTime = new Date()
 
-        for (let i = 0; i < pixels.length; i += 4) {
-            let c = 0
-            let r, g, b
-            r = g = b = 0
-
-            if (this.props.showPixels) {
-                pixels[i] = this.state.pixels[i]
-                pixels[i + 1] = this.state.pixels[i + 1]
-                pixels[i + 2] = this.state.pixels[i + 2]
-            }
-            if (this.props.showPath) {
-                if (this.state.path[i] < 255) {
-                    pixels[i] = this.state.path[i]
-                    pixels[i + 1] = this.state.path[i + 1]
-                    pixels[i + 2] = this.state.path[i + 2]
-                }
-            }
-
-            pixels[i + 3] = 255
+        if (this.props.showPixels) {
+            this.state.context.dest.scale(this.state.scale, this.state.scale)
+            this.state.context.dest.imageSmoothingEnabled = false
+            this.state.context.dest.drawImage(this.refs.src, 0, 0)
+            this.state.context.dest.scale(1 / this.state.scale, 1 / this.state.scale)
         }
-        let imageData = new ImageData( pixels, this.state.image.width, this.state.image.height )
-        this.state.context.dest.putImageData( imageData, 0, 0 )
+
+        if (this.props.showPath) {
+            this.drawPaths(this.state.outerPaths, '#ff0000')
+            this.drawPaths(this.state.innerPaths, '#ff8800')
+        }
+
+        let endTime = new Date()
+        console.log(`Drawing took ${endTime-startTime}ms to complete`)
+    }
+
+
+    drawPaths (paths, color) {
+        this.state.context.dest.strokeStyle = color
+
+        for (let path of paths) {
+            let first = true
+            for (let edge of path) {
+                let posX = edge.pos % this.state.image.width
+                let posY = (edge.pos - posX) / this.state.image.width
+
+                if (first) {
+                    this.state.context.dest.beginPath()
+                    this.state.context.dest.moveTo(posX * this.state.scale, posY * this.state.scale)
+                }
+
+                this.state.context.dest.lineTo(posX * this.state.scale, posY * this.state.scale)
+                first = false
+            }
+            this.state.context.dest.stroke()
+            this.state.context.dest.closePath()
+        }
     }
 
 
@@ -154,7 +183,7 @@ export default class Canvas extends Component {
 
         return (
             <div className='row'>
-                <div className='canvas hidden'>
+                <div className='canvas col-xs-12 hidden'>
                     <canvas className='canvas__canvas' ref='src' id='src' />
                     {sizeLabel}
                 </div>

@@ -1,8 +1,8 @@
 export const direction = {
-    up : Symbol('up'),
-    right : Symbol('right'),
-    down : Symbol('down'),
-    left : Symbol('left'),
+    up : 'up',//Symbol('up'),
+    right : 'right',//Symbol('right'),
+    down : 'down',//Symbol('down'),
+    left : 'left',//Symbol('left'),
 }
 
 export class Edge {
