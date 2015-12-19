@@ -125,11 +125,12 @@ export default class Canvas extends Component {
                 context.state.context.dest.imageSmoothingEnabled = false
                 context.state.context.dest.drawImage(context.refs.tmp, 0, 0)
                 context.state.context.dest.scale(1 / scale, 1 / scale)
-            } else if (event.data.straightPaths) {
-                context.setState({ straightPaths : event.data.straightPaths })
+            } else if (event.data.polygons) {
+                context.setState({ polygons : event.data.polygons })
             } else if (event.data.paths) {
                 context.setState({ paths : event.data.paths })
-            } else if (event.data.done) {
+            }
+            if (event.data.done) {
                 context.drawContent()
             }
 
@@ -156,12 +157,12 @@ export default class Canvas extends Component {
         }
 
         if (this.props.showPath) {
-            this.drawPaths(this.state.paths[0], '#E00051', true)
-            this.drawPaths(this.state.paths[1], '#FD8508', true)
+            this.drawPaths(this.state.paths[0], '#E00051')
+            this.drawPaths(this.state.paths[1], '#FD8508')
         }
 
         if (this.props.showPolygon) {
-            this.drawPaths(this.state.straightPaths, '#445CFB', true)
+            this.drawPaths(this.state.polygons, '#445CFB', true)
         }
 
         let endTime = new Date()
@@ -170,7 +171,7 @@ export default class Canvas extends Component {
 
 
     drawGrid () {
-        const width = 20
+        const width = this.state.scale
         let i = 0
         this.state.context.dest.beginPath()
         this.state.context.dest.strokeStyle = '#8C8C8C'
@@ -216,6 +217,7 @@ export default class Canvas extends Component {
                     this.state.context.dest.beginPath()
                     this.state.context.dest.arc(edge.x * this.state.scale, edge.y * this.state.scale, 3, 0, 2 * Math.PI, false)
                     this.state.context.dest.fill()
+                    this.state.context.dest.closePath()
                 }
             }
 

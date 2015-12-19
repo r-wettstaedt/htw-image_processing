@@ -1,57 +1,33 @@
 import {Vector} from '../edge'
 
-export default function (paths) {
+export default function (index, path) {
+    let c0 = new Vector(0, 0)
+    let c1 = new Vector(0, 0)
 
-    let straightPaths = []
+    let directions = []
+    let v_i = new Vector(path[index].x, path[index].y)
+    let k
 
-    for (let path of paths) {
-        // let path = paths[0]
-        let i = 0
-        let straightPath = []
+    for (let kk = index + 1; kk < (path.length + index); kk++) {
+        k = kk % path.length
+        let k1 = k ? k - 1 : path.length - 1
 
-        for (let edge of path) {
-            let c0 = new Vector(0, 0)
-            let c1 = new Vector(0, 0)
-
-            let directions = 0
-            let v_i = new Vector(path[i].x, path[i].y)
-            let k
-
-            for (let kk = i + 1; kk < path.length; kk++) {
-                k = kk % path.length
-
-                if (path[k].dir !== path[k - 1].dir)
-                    directions++
-
-                if (directions > 3) break
-
-                let v_k = new Vector(path[k].x, path[k].y)
-                let v = new Vector(v_k.x - v_i.x, v_k.y - v_i.y)
-
-                let cp0 = Vector.crossProduct(c0, v)
-                let cp1 = Vector.crossProduct(c1, v)
-
-                if (cp0 < 0 || cp1 > 0) {
-                    // console.log("msg")
-                    break
-                }
-
-                updateConstraints(v, c0, c1)
-            }
-
-            if (path[k])
-                straightPath.push(path[k])
-
-            i++
+        if (directions.indexOf(path[k].dir) === -1) {
+            directions.push(path[k].dir)
         }
-        straightPaths.push(straightPath)
 
+        let v_k = new Vector(path[k].x, path[k].y)
+        let v = new Vector(v_k.x - v_i.x, v_k.y - v_i.y)
+
+        let cp0 = Vector.crossProduct(c0, v)
+        let cp1 = Vector.crossProduct(c1, v)
+
+        if (cp0 < 0 || cp1 > 0 || directions.length > 3) break
+
+        updateConstraints(v, c0, c1)
     }
 
-    return new Promise(function (resolve) {
-        resolve(straightPaths)
-    })
-
+    return --k < 0 ? path.length + k : k
 }
 
 

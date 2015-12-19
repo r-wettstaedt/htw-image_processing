@@ -1,6 +1,17 @@
 import {direction} from '../edge'
 import path from './path'
 
+function cleanup (paths) {
+    for (let path of paths) {
+        for (let i = 0; i < path.length; i++) {
+            if (path[i - 1] && path[i].pos === path[i - 1].pos) {
+                path.splice(i, 1)
+                --i
+            }
+        }
+    }
+}
+
 function invertPixels (pixels, config, image, notify, invertedPixels, lastPath) {
 
     for (let index = 0; index < lastPath.length; index++) {
@@ -101,6 +112,9 @@ export default function(pixels, config, image, notify) {
         invertPixels.apply(null, [...arguments, invertedPixels, lastPath])
 
     }
+
+    cleanup(outerPaths)
+    cleanup(innerPaths)
 
     return new Promise(function (resolve) {
         resolve([outerPaths, innerPaths])

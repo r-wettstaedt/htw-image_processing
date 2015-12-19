@@ -1,6 +1,6 @@
-import {binarize} from './colorConvert'
 import pathDecomposition from './path/pathDecomposition'
 import straightPath from './path/straightPath'
+import polygon from './path/polygonDecomposition'
 
 onmessage = event => {
 
@@ -26,10 +26,13 @@ onmessage = event => {
         console.log(`Path Decomposition took ${endTime-startTime}ms to complete`)
         startTime = new Date()
 
-        return straightPath(paths[0].concat(paths[1]))
+        return polygon(paths[0].concat(paths[1]), config,
+            polygons => {
+                postMessage({ polygons : polygons, done : true })
+        })
 
-    }).then( straightPaths => {
-        postMessage({ straightPaths : straightPaths })
+    }).then( polygons => {
+        postMessage({ polygons : polygons })
 
         endTime = new Date()
         console.log(`Polygon creation took ${endTime-startTime}ms to complete`)
