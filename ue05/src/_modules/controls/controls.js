@@ -1,7 +1,7 @@
 import React, {Component, PropTypes} from 'react'
 import {bindActionCreators} from 'redux'
 import {connect} from 'react-redux';
-import {changeVisual, changeGrid, changePixels, changePath, changePolygon, changeCurve, changeZoom} from '../../_flux/actions'
+import {changeVisual, changeGrid, changePixels, changePath, changePolygon, changeCurve, changeZoom, changeSVG} from '../../_flux/actions'
 
 import PictureSelect from '../pictureSelect/pictureSelect'
 
@@ -14,10 +14,11 @@ import PictureSelect from '../pictureSelect/pictureSelect'
         showPath : state.controls.showPath,
         showPolygon : state.controls.showPolygon,
         showCurve : state.controls.showCurve,
+        showSVG : state.controls.showSVG,
 
         zoom : state.controls.zoom,
     }),
-    dispatch => bindActionCreators({changeVisual, changeGrid, changePixels, changePath, changePolygon, changeCurve, changeZoom}, dispatch))
+    dispatch => bindActionCreators({changeVisual, changeGrid, changePixels, changePath, changePolygon, changeCurve, changeSVG, changeZoom}, dispatch))
 
 export default class Controls extends Component {
 
@@ -43,6 +44,10 @@ export default class Controls extends Component {
 
     curveChanged (event) {
         this.props.changeCurve(event.target.checked)
+    }
+
+    SVGChanged (event) {
+        this.props.changeSVG(event.target.checked)
     }
 
     zoomChanged (event) {
@@ -95,6 +100,13 @@ export default class Controls extends Component {
                         </label>
                     </div>
 
+                    <div className='controls-wrapper center-content col-xs-6 col-sm-2'>
+                        <label>
+                            SVG
+                            <input type='checkbox' onChange={this.SVGChanged.bind(this)} checked={this.props.showSVG} />
+                        </label>
+                    </div>
+
                     <div className='controls-wrapper center-content col-xs-12'>
                         <label>
                             Zoom
@@ -116,10 +128,13 @@ export default class Controls extends Component {
 
 Controls.propTypes = {
     changeVisual : PropTypes.func,
+
     changeGrid : PropTypes.func,
     changePixels : PropTypes.func,
     changePath : PropTypes.func,
     changePolygon : PropTypes.func,
     changeCurve : PropTypes.func,
+    changeSVG : PropTypes.func,
+
     changeZoom : PropTypes.func,
 }

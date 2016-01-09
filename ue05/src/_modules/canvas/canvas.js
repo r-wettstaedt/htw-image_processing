@@ -19,6 +19,7 @@ let Worker = require('worker!../../_scripts/worker')
         showPath : state.controls.showPath,
         showPolygon : state.controls.showPolygon,
         showCurve : state.controls.showCurve,
+        showSVG : state.controls.showSVG,
 
         zoom : state.controls.zoom,
     })
@@ -136,7 +137,7 @@ export default class Canvas extends Component {
 
             } else if (event.data.paths) {
 
-                context.setState({ paths : event.data.paths, concatCount : event.data.concatCount })
+                context.setState({ paths : event.data.paths })
 
             } else if (event.data.polygons) {
 
@@ -174,8 +175,10 @@ export default class Canvas extends Component {
         }
 
         if (this.props.showPath && this.state.paths) {
-            this.drawPaths(this.state.paths[0], '#E00051')
-            this.drawPaths(this.state.paths[1], '#FD8508')
+            this.drawPaths(this.state.paths, {
+                0   : '#FD8508',
+                255 : '#E00051',
+            })
         }
 
         if (this.props.showPolygon && this.state.polygons) {
@@ -183,7 +186,7 @@ export default class Canvas extends Component {
         }
 
         if (this.props.showCurve && this.state.curves) {
-            this.drawCurves(this.state.curves, '#7ABA3A', true)
+            this.drawPaths(this.state.curves, '#7ABA3A')
         }
 
         let endTime = new Date()
@@ -222,8 +225,13 @@ export default class Canvas extends Component {
 
 
     resetContext (color) {
-        this.state.context.dest.strokeStyle = color
-        this.state.context.dest.fillStyle = color
+        if (typeof color === 'string') {
+            this.state.context.dest.strokeStyle = color
+            this.state.context.dest.fillStyle = color
+        } else if (typeof color === 'object') {
+            this.state.context.dest.strokeStyle = color[255]
+            this.state.context.dest.fillStyle = color[255]
+        }
         this.state.context.dest.lineWidth = 2
         this.state.context.dest.globalAlpha = 1
     }
@@ -235,17 +243,38 @@ export default class Canvas extends Component {
         const scale = this.state.scale
 
         for (let path of paths) {
-            ctx.beginPath()
-            ctx.moveTo(path[0].x * scale, path[0].y * scale)
 
-            for (let edge of path) {
-                ctx.lineTo(edge.x * scale, edge.y * scale)
+            if (typeof color === 'object') {
+                ctx.strokeStyle = color[path.type]
+                ctx.fillStyle = color[path.type]
             }
+            ctx.beginPath()
+
+
+            if (path.data[0].x)
+                ctx.moveTo(path.data[0].x * scale, path.data[0].y * scale)
+            else
+                ctx.moveTo(path.data[0].z0.x * scale, path.data[0].z0.y * scale)
+
+
+            for (let edge of path.data) {
+
+                if (edge.x)
+                    ctx.lineTo(edge.x * scale, edge.y * scale)
+
+                else
+                    ctx.bezierCurveTo(
+                        edge.z1.x * scale, edge.z1.y * scale,
+                        edge.z2.x * scale, edge.z2.y * scale,
+                        edge.z3.x * scale, edge.z3.y * scale)
+
+            }
+
             ctx.stroke()
             ctx.closePath()
 
             if (drawVertices) {
-                for (let edge of path) {
+                for (let edge of path.data) {
                     ctx.beginPath()
                     ctx.arc(edge.x * scale, edge.y * scale, 3, 0, 2 * Math.PI, false)
                     ctx.fill()
@@ -253,27 +282,6 @@ export default class Canvas extends Component {
                 }
             }
 
-        }
-    }
-
-    drawCurves (curves, color) {
-        this.resetContext(color)
-        const ctx = this.state.context.dest
-        const scale = this.state.scale
-
-        for (let curve of curves) {
-            ctx.beginPath()
-            ctx.moveTo(curve[0].z0.x * scale, curve[0].z0.y * scale)
-
-            for (let c of curve) {
-                ctx.bezierCurveTo(
-                    c.z1.x * scale, c.z1.y * scale,
-                    c.z2.x * scale, c.z2.y * scale,
-                    c.z3.x * scale, c.z3.y * scale)
-            }
-            ctx.stroke()
-            ctx.closePath()
-            // ctx.fill()
         }
     }
 
@@ -285,7 +293,7 @@ export default class Canvas extends Component {
 
         return (
             <div>
-                <div className='row'>
+                <div className={this.props.showSVG ? 'hidden' : 'row'}>
                     <div className='canvas col-xs-12 hidden'>
                         <canvas className='canvas__canvas' ref='src' id='src' />
                         {sizeLabel}
@@ -302,7 +310,7 @@ export default class Canvas extends Component {
                     </div>
                 </div>
 
-                <SVG curves={this.state.curves} concatCount={this.state.concatCount} image={this.state.image} />
+                <SVG className={this.props.showSVG ? '' : 'hidden'} curves={this.state.curves} image={this.state.image} />
             </div>
         )
     }

@@ -11,6 +11,7 @@ export const CHANGE_PIXELS = 'CHANGE_PIXELS'
 export const CHANGE_PATH = 'CHANGE_PATH'
 export const CHANGE_POLYGON = 'CHANGE_POLYGON'
 export const CHANGE_CURVE = 'CHANGE_CURVE'
+export const CHANGE_SVG = 'CHANGE_SVG'
 
 export const CHANGE_ZOOM = 'CHANGE_ZOOM'
 
@@ -72,6 +73,13 @@ export function changeCurve (showCurve) {
     return {
         type: CHANGE_CURVE,
         showCurve
+    }
+}
+
+export function changeSVG (showSVG) {
+    return {
+        type: CHANGE_SVG,
+        showSVG
     }
 }
 

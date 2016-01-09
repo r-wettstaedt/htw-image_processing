@@ -3,9 +3,9 @@ import path from './path'
 
 function cleanup (paths) {
     for (let path of paths) {
-        for (let i = 0; i < path.length; i++) {
-            if (path[i - 1] && path[i].pos === path[i - 1].pos) {
-                path.splice(i, 1)
+        for (let i = 0; i < path.data.length; i++) {
+            if (path.data[i - 1] && path.data[i].pos === path.data[i - 1].pos) {
+                path.data.splice(i, 1)
                 --i
             }
         }
@@ -74,6 +74,7 @@ export default function(pixels, config, image, notify) {
 
     let outerPaths = []
     let innerPaths = []
+    let paths = []
     let invertedPixels = pixels
 
     while (true) {
@@ -103,21 +104,25 @@ export default function(pixels, config, image, notify) {
 
         let lastPath = path(invertedPixels, ++pos, config, image, notify)
 
-        if (alpha === 0)
-            innerPaths.push(lastPath)
-        else
-            outerPaths.push(lastPath)
+        // if (alpha === 0)
+            paths.push({
+                data : lastPath,
+                type : alpha,
+            })
+            // innerPaths.push(lastPath)
+        // else
+            // outerPaths.push(lastPath)
 
         invertedPixels = invertedPixels.slice(0)
         invertPixels.apply(null, [...arguments, invertedPixels, lastPath])
 
     }
 
-    cleanup(outerPaths)
-    cleanup(innerPaths)
+    // cleanup(outerPaths)
+    cleanup(paths)
 
     return new Promise(function (resolve) {
-        resolve([outerPaths, innerPaths])
+        resolve(paths)
     })
 
 }

@@ -25,6 +25,7 @@ const initialState = {
     showPath : false,
     showPolygon : false,
     showCurve : true,
+    showSVG : false,
 
     zoom : 1,
 }
@@ -78,6 +79,12 @@ function controls (state = initialState, action) {
         case actions.CHANGE_CURVE:
             return Object.assign({}, state, {
                 showCurve : action.showCurve,
+                imageChanged : false,
+            })
+
+        case actions.CHANGE_SVG:
+            return Object.assign({}, state, {
+                showSVG : action.showSVG,
                 imageChanged : false,
             })
 

@@ -8,19 +8,19 @@ export default function (paths, config, notify) {
     for (let path of paths) {
 
         let i = 0
-        let polygon = [new Vector(path[i + 1].x, path[i + 1].y)]
+        let polygon = [new Vector(path.data[i + 1].x, path.data[i + 1].y)]
 
         while (true) {
 
-            let j = straightPath(i, path)
-            j = --j < 0 ? path.length + j : j
+            let j = straightPath(i, path.data)
+            j = --j < 0 ? path.data.length + j : j
 
             if (j < i) {
-                polygon.push(new Vector(path[1].x, path[1].y))
+                polygon.push(new Vector(path.data[1].x, path.data[1].y))
                 break
             }
 
-            polygon.push(new Vector(path[j].x, path[j].y))
+            polygon.push(new Vector(path.data[j].x, path.data[j].y))
 
             if (config.useVisual) {
                 let tmp1 = polygons.slice(0)
@@ -32,7 +32,10 @@ export default function (paths, config, notify) {
 
         }
 
-        polygons.push(polygon)
+        polygons.push({
+            data : polygon,
+            type : path.type,
+        })
         if (config.useVisual) {
             notify(polygons)
         }

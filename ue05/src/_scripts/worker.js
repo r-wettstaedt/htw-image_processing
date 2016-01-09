@@ -21,13 +21,13 @@ onmessage = event => {
         pixels => {postMessage({ pixels : pixels })
 
     }).then( paths => {
-        postMessage({ paths : paths, concatCount : paths[0].length })
+        postMessage({ paths : paths })
 
         endTime = new Date()
         console.log(`Path Decomposition took ${endTime-startTime}ms to complete`)
         startTime = new Date()
 
-        return polygon(paths[0].concat(paths[1]), config,
+        return polygon(paths, config,
             polygons => {
                 postMessage({ polygons : polygons, done : true })
         })
