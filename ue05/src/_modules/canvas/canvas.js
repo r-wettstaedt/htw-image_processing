@@ -165,6 +165,8 @@ export default class Canvas extends Component {
         if (this.props.showPixels) {
             this.state.context.dest.globalAlpha = 1
             this.state.context.dest.scale(this.state.scale, this.state.scale)
+            this.state.context.dest.webkitImageSmoothingEnabled = false
+            this.state.context.dest.mozImageSmoothingEnabled = false
             this.state.context.dest.imageSmoothingEnabled = false
             this.state.context.dest.drawImage(this.refs.src, 0, 0)
             this.state.context.dest.scale(1 / this.state.scale, 1 / this.state.scale)

@@ -1,5 +1,4 @@
 import React, {Component, PropTypes} from 'react'
-import server from 'react-dom/Server'
 
 export default class SVG extends Component {
 
