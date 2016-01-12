@@ -36,13 +36,17 @@ export default function (polygons, config) {
                 let z1 = new Vector(b_m_1.x + (a_b_m_1.x * alpha), b_m_1.y + (a_b_m_1.y * alpha))
                 let z2 = new Vector(b.x + (a_b.x * alpha)        , b.y + (a_b.y * alpha))
 
-                path = new Bezier(b_m_1, z1, z2, b)
+                path = new Bezier(b_m_1, z1, z2, b, a)
             } else {
                 path = a
             }
 
             curve.push(path)
 
+        }
+
+        if (curve[0].x) {
+            curve.push(curve[0])
         }
 
         curves.push({
